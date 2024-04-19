@@ -4,9 +4,14 @@ import { Controller, useForm } from "react-hook-form";
 
 import Checkbox from "@mui/material/Checkbox";
 import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
+
+import DatePicker from "react-multi-date-picker";
+import persian from "react-date-object/calendars/persian";
+import persian_fa from "react-date-object/locales/persian_fa";
 
 import { STACK_SELECTION_OPTIONS } from "../../constants/stackSelections";
 
@@ -45,87 +50,113 @@ const ClientInput = () => {
   };
   return (
     <form onSubmit={handleSubmit(formSubmitHandler)}>
-      <Controller
-        name='clientName'
-        control={control}
-       
-        render={({
-          field: { onChange, value },
-          fieldState: { error, invalid },
-          formState: { errors },
-        }) => {
-          return (
-            <TextField
-              value={value}
-              onChange={onChange}
-              error={!!error}
-              helperText={invalid && error?.message ? error?.message : null}
-              required
-              variant='outlined'
-              type='text'
-              label='نام مشتری'
-            />
-          );
-        }}
-      />
-      <Controller
-        name='clientName'
-        control={control}
-        render={(field) => {
-          return (
-            <Autocomplete
-              sx={{ direction: "rtl", width: "20%" }}
-              multiple
-              limitTags={2}
-              value={value}
-              filterOptions={autoCompleteFilterHandler}
-              onChange={autoCompleteChangeHandler}
-              options={STACK_SELECTION_OPTIONS}
-              disableCloseOnSelect
-              getOptionLabel={(option) => option.name}
-              renderOption={(props, option, { selected }) => (
-                <li {...props}>
-                  <Checkbox
-                    icon={icon}
-                    checkedIcon={checkedIcon}
-                    style={{ marginRight: 8 }}
-                    checked={
-                      option.all
-                        ? !!(value.length === STACK_SELECTION_OPTIONS.length)
-                        : selected
-                    }
+      <Box
+        sx={{
+          display: "flex",
+          direction: "rtl",
+          flexDirection: "row-reverse",
+        }}>
+        <Controller
+          name='clientName'
+          control={control}
+          render={({
+            field: { onChange, value },
+            fieldState: { error, invalid },
+            formState: { errors },
+          }) => {
+            return (
+              <TextField
+                value={value}
+                onChange={onChange}
+                error={!!error}
+                helperText={invalid && error?.message ? error?.message : null}
+                required
+                variant='outlined'
+                type='text'
+                label='نام مشتری'
+              />
+            );
+          }}
+        />
+        <Controller
+          name='clientName'
+          control={control}
+          render={(field) => {
+            return (
+              <Autocomplete
+                sx={{ direction: "rtl", width: "20%" }}
+                multiple
+                limitTags={2}
+                value={value}
+                filterOptions={autoCompleteFilterHandler}
+                onChange={autoCompleteChangeHandler}
+                options={STACK_SELECTION_OPTIONS}
+                disableCloseOnSelect
+                getOptionLabel={(option) => option.name}
+                renderOption={(props, option, { selected }) => (
+                  <li {...props}>
+                    <Checkbox
+                      icon={icon}
+                      checkedIcon={checkedIcon}
+                      style={{ marginRight: 8 }}
+                      checked={
+                        option.all
+                          ? !!(value.length === STACK_SELECTION_OPTIONS.length)
+                          : selected
+                      }
+                    />
+                    {option.name}
+                  </li>
+                )}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label='حوزه تخصصی'
+                    variant='outlined'
+                    placeholder='تخصص'
                   />
-                  {option.name}
-                </li>
-              )}
-              style={{ width: 500 }}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label='حوزه تخصصی'
-                  variant='outlined'
-                  placeholder='تخصص'
-                />
-              )}
-            />
-          );
-        }}
-      />
-      {/* <Controller
-        name='clientName'
-        control={control}
-        render={(field) => {
-          return <TextField variant='outlined' type='text' label='نام مشتری' />;
-        }}
-      />
-      <Controller
+                )}
+              />
+            );
+          }}
+        />
+        <Controller
+           control={control}
+           name="date"
+           rules={{ required: true }} //optional
+           render={({
+             field: { onChange, name, value },
+             fieldState: { invalid, isDirty }, //optional
+             formState: { errors }, //optional, but necessary if you want to show an error message
+           }) => (
+             <>
+               <DatePicker
+                 value={value || ""}
+                 onChange={(date) => {
+                   onChange(date?.isValid ? date : "");
+                 }}
+                 format="YYYY/MM/DD"
+                 calendar={persian}
+                 locale={persian_fa}
+                 calendarPosition="bottom-right"
+               />
+               {errors && errors[name] && errors[name].type === "required" && (
+                 //if you want to show an error message
+                 <span>your error message !</span>
+               )}
+             </>
+           )}
+         />
+        
+        {/* <Controller
         name='clientName'
         control={control}
         render={(field) => {
           return <TextField variant='outlined' type='text' label='نام مشتری' />;
         }}
       /> */}
-      <input type='submit' />
+        <input type='submit' />
+      </Box>
     </form>
   );
 };
