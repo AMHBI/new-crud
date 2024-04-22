@@ -16,10 +16,10 @@ const ApiClient = new ApolloClient({
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <ApolloProvider client={ApiClient}>
-    <CacheProvider value={cacheRtl}>
-      <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <CacheProvider value={cacheRtl}>
         <App />
-      </ThemeProvider>
-    </CacheProvider>
+      </CacheProvider>
+    </ThemeProvider>
   </ApolloProvider>
 );
