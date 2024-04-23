@@ -12,16 +12,43 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { IconButton, Tooltip } from "@mui/material";
+import { Button, IconButton, Modal, Tooltip } from "@mui/material";
 import { GET_CLIENTS } from "../../graphql/queries";
+import { decodedFile } from "../../utils/base64ToFile";
+
+// const ShowModal =  ({onClick,onClose,open,url}) => {
+//   return  (
+//     <Modal
+//       open={open}
+//       onClose={onClose}
+//       // className={classes.modal}
+//       aria-labelledby="file-modal"
+//       aria-describedby="file-modal-description"
+//     >
+//       <div >
+//         <iframe title="file-preview" src={decodedFile(url)} style={{ width: '100%', height: '500px' }} />
+//       </div>
+//     </Modal>
+//   );
+// }
 
 const ClientTable = ({
   clientQueryData,
   clientQueryLoading,
   setIsEditing,
-  setEditRowData
+  setEditRowData,
 }) => {
   const [clientData, setClientData] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [fileString, setFileString] = useState("");
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+  };
+
+  const showFilesInModal = (filesArray) => {
+    console.log(filesArray);
+  };
   const [
     deleteClient,
     {
@@ -44,17 +71,16 @@ const ClientTable = ({
       variables: {
         id: deleteId,
       },
-      refetchQueries:[GET_CLIENTS]
+      refetchQueries: [GET_CLIENTS],
     });
   };
-  console.log("clientQueryData :", clientQueryData);
 
   const editHandler = (client) => {
-    setIsEditing(false)
-    setEditRowData(client)
-    setIsEditing(true)
+    setEditRowData(client);
+    setIsEditing(true);
   };
-  if(clientQueryLoading)return <h1>Loading...</h1>
+
+  if (clientQueryLoading) return <h1>Loading...</h1>;
   return (
     <div>
       <TableContainer component={Paper}>
@@ -87,7 +113,17 @@ const ClientTable = ({
                   <TableCell align='right'>
                     {new Date(+i.date).toLocaleDateString("fa")}
                   </TableCell>
-                  <TableCell align='right'>{i.customerCreateDate}</TableCell>
+                  <TableCell align='right'>
+                    {!!JSON.parse(i.files).length && (
+                      <>
+                        {JSON.parse(i.files).length}
+                        <Button
+                          onClick={() => showFilesInModal(JSON.parse(i.files))}>
+                          نمایش فایل ها
+                        </Button>
+                      </>
+                    )}
+                  </TableCell>
                   <TableCell align='right'>
                     <Tooltip title='ویرایش' arrow enterDelay={2000}>
                       <IconButton onClick={() => editHandler(i)}>
@@ -108,6 +144,7 @@ const ClientTable = ({
           </TableBody>
         </Table>
       </TableContainer>
+      {/* <ShowModal open={modalOpen} onClose={handleModalClose}  url={fileString}/> */}
     </div>
   );
 };

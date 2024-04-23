@@ -21,7 +21,20 @@ import { STACK_SELECTION_OPTIONS } from "../../constants/stackSelections";
 import MultiSelectAutoComplete from "./MultiSelectAutoComplete";
 import MultiFileUpload from "./MultiFileUpload";
 import { GET_CLIENTS } from "../../graphql/queries";
+import { Grid } from "@mui/material";
 
+function CustomTextField({ onFocus, value, onChange, errors }) {
+  return (
+    <TextField
+      onFocus={onFocus}
+      value={value}
+      error={errors?.date}
+      helperText={errors?.date}
+      onChange={onChange}
+      label='تاریخ'
+    />
+  );
+}
 const ClientInput = ({ setIsEditing, isEditing, editRowData }) => {
   const [selectValue, setSelectValue] = useState([]);
   const [files, setFiles] = useState([]);
@@ -87,23 +100,19 @@ const ClientInput = ({ setIsEditing, isEditing, editRowData }) => {
     });
     reset();
     setSelectValue([]);
-    console.log("Client Input Form Submit Data : ", data);
   };
-  console.log("editRowData", editRowData);
   useEffect(() => {
     if (isEditing) {
       setValue("clientName", editRowData.name);
       setSelectValue(JSON.parse(editRowData.sections));
       setValue("date", new Date(+editRowData.date));
-      // setValue("files",editRowData.name)
     }
   }, [isEditing]);
-  const editHandler = () => {
+  const editHandler = async () => {
     const [name, sections, date] = getValues(["clientName", "section", "date"]);
-console.log(date);
     editClient({
       variables: {
-        id: +editRowData.id,
+        id: await editRowData.id,
         name,
         date: JSON.stringify(date),
         sections: JSON.stringify(sections),
@@ -113,7 +122,11 @@ console.log(date);
     });
     setIsEditing(false);
   };
-  console.log("CR Loading :", createClientLoading);
+  const cancelEditHandler = () => {
+    setIsEditing(false);
+    reset();
+    setSelectValue([]);
+  };
   useEffect(() => {
     setValue("section", selectValue);
   }, [selectValue]);
@@ -124,112 +137,139 @@ console.log(date);
 
   return (
     <>
-      <form onSubmit={isEditing ? null : handleSubmit(formSubmitHandler)}>
-        <Box
-          sx={{
-            display: "flex",
-            direction: "rtl",
-            flexDirection: "row-reverse",
-          }}>
-          <Controller
-            name='clientName'
-            control={control}
-            defaultValue={""}
-            render={({
-              field: { name, value, onChange },
-              fieldState: { error, invalid },
-              formState: { errors },
-            }) => {
-              return (
-                <TextField
-                  value={value}
-                  onChange={onChange}
-                  name={name}
-                  error={!!error}
-                  helperText={invalid && error?.message ? error?.message : null}
-                  variant='outlined'
-                  type='text'
-                  label='نام مشتری'
-                />
-              );
-            }}
-          />
-          <Controller
-            name='section'
-            control={control}
-            defaultValue={""}
-            // rules={{ required: true }}
-            render={({
-              field: { name, value, onChange },
-              fieldState: { error },
-            }) => {
-              return (
-                <MultiSelectAutoComplete
-                  onChange={onChange}
-                  selectOptions={STACK_SELECTION_OPTIONS}
-                  // onChange={(ev) =>  onChange(ev => ev.target.value)}
-                  label='حوزه تخصصی'
-                  name={name}
-                  value={selectValue}
-                  // error={!!error}
-                  setSelectValue={setSelectValue}
-                />
-              );
-            }}
-          />
-          <Controller
-            control={control}
-            name='date'
-            rules={{ required: true }}
-            render={({
-              field: { name, value, onChange },
-              fieldState: { invalid, isDirty },
-              formState: { errors },
-            }) => (
+      <form onSubmit={handleSubmit(formSubmitHandler)}>
+        <Grid
+          container
+          flex={true}
+          justifyContent='space-between'
+          alignItems='flex-start'>
+          <Grid item xs={2} md={2}>
+            <Controller
+              name='clientName'
+              control={control}
+              defaultValue={""}
+              rules={{ required: "وارد کردن نام الزامی است" }}
+              render={({
+                field: { name, value, onChange },
+                fieldState: { error, invalid },
+                formState: { errors },
+              }) => {
+                return (
+                  <TextField
+                    value={value}
+                    onChange={onChange}
+                    name={name}
+                    error={!!error}
+                    helperText={
+                      invalid && error?.message ? error?.message : null
+                    }
+                    variant='outlined'
+                    type='text'
+                    label='نام مشتری'
+                  />
+                );
+              }}
+            />
+          </Grid>
+          <Grid item xs={2} md={2}>
+            <Controller
+              name='section'
+              control={control}
+              defaultValue={selectValue}
+              render={({
+                field: { name, value, onChange },
+                fieldState: { error },
+              }) => {
+                return (
+                  <MultiSelectAutoComplete
+                    onChange={onChange}
+                    selectOptions={STACK_SELECTION_OPTIONS}
+                    label='حوزه تخصصی'
+                    name={name}
+                    value={selectValue}
+                    setSelectValue={setSelectValue}
+                  />
+                );
+              }}
+            />
+          </Grid>
+          <Grid item xs={2} md={2}>
+            <Controller
+              control={control}
+              name='date'
+              rules={{ required: "وارد کردن تاریخ الزامی است" }}
+              render={({
+                field: { name, value, onChange },
+                fieldState: { invalid, isDirty },
+                formState: { errors },
+              }) => (
+                <>
+                  <DatePicker
+                    value={value || ""}
+                    onChange={(date) => {
+                      onChange(date?.isValid ? date.toUnix() * 1000 : "");
+                    }}
+                    format='YYYY/MM/DD'
+                    calendar={persian}
+                    locale={persian_fa}
+                    calendarPosition='bottom-right'
+                    render={(value, openCalendar, onChange) => {
+                      return (
+                        <TextField
+                          value={value}
+                          onChange={onChange}
+                          placeholder='تاریخ'
+                          name='تاریخ'
+                          onClick={openCalendar}
+                          error={errors?.date?.message ? true : false}
+                          helperText={errors?.date?.message}
+                        />
+                      );
+                    }}
+                  />
+                </>
+              )}
+            />
+          </Grid>
+          <Grid item xs={2} md={2}>
+            <Controller
+              name='files'
+              control={control}
+              render={(field) => {
+                return (
+                  <MultiFileUpload
+                    files={files}
+                    setFiles={setFiles}
+                    serverFiles={serverFiles}
+                    setServerFiles={setServerFiles}
+                  />
+                );
+              }}
+            />
+          </Grid>
+          <Grid item xs={2} md={2}>
+            {isEditing ? (
               <>
-                <DatePicker
-                  value={value || ""}
-                  placeholder='تاریخ'
-                  onChange={(date) => {
-                    onChange(date?.isValid ? date.toUnix() * 1000 : "");
-                  }}
-                  format='YYYY/MM/DD'
-                  calendar={persian}
-                  locale={persian_fa}
-                  calendarPosition='bottom-right'
-                />
-                {errors && errors[name] && errors[name].type === "required" && (
-                  <span>انتخاب تاریخ الزامی است</span>
-                )}
+                <Button
+                  variant='text'
+                  disabled={!!isSubmitting}
+                  onClick={editHandler}>
+                  {isSubmitting ? "درحال ارسال..." : "ویرایش اطلاعات"}
+                </Button>
+                <Button
+                  variant='text'
+                  sx={{ color: "red" }}
+                  onClick={cancelEditHandler}>
+                  لغو تغییرات
+                </Button>
               </>
+            ) : (
+              <Button disabled={!!isSubmitting} type='submit'>
+                {isSubmitting ? "درحال ارسال..." : "ارسال اطلاعات"}
+              </Button>
             )}
-          />
-
-          <Controller
-            name='files'
-            control={control}
-            render={(field) => {
-              return (
-                <MultiFileUpload
-                  files={files}
-                  setFiles={setFiles}
-                  serverFiles={serverFiles}
-                  setServerFiles={setServerFiles}
-                />
-              );
-            }}
-          />
-
-          {isEditing ? (
-            <Button disabled={!!isSubmitting} onClick={editHandler}>
-              {isSubmitting ? "درحال ارسال..." : "ویرایش اطلاعات"}
-            </Button>
-          ) : (
-            <Button disabled={!!isSubmitting} type='submit'>
-              {isSubmitting ? "درحال ارسال..." : "ارسال اطلاعات"}
-            </Button>
-          )}
-        </Box>
+          </Grid>
+        </Grid>
       </form>
     </>
   );

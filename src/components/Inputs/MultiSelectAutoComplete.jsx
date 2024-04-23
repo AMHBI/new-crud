@@ -14,7 +14,7 @@ const MultiSelectAutoComplete = ({
   value,
   setSelectValue,
   error,
-  name
+  name,
 }) => {
   const filterHandler = (options, params) => {
     const filter = createFilterOptions();
@@ -31,9 +31,8 @@ const MultiSelectAutoComplete = ({
   };
   return (
     <Autocomplete
-      sx={{ width: "30%" }}
+      sx={{ maxHeight: "10dvh", backgroundColor: "white" }}
       multiple
-      
       limitTags={2}
       value={value}
       filterOptions={filterHandler}
@@ -58,12 +57,12 @@ const MultiSelectAutoComplete = ({
       )}
       renderInput={(params) => (
         <TextField
+          sx={{ maxHeight: "10dvh", backgroundColor: "white" }}
           {...params}
           error={!!error}
           label={label}
           name={name}
           variant='outlined'
-          placeholder={label}
         />
       )}
       isOptionEqualToValue={(option, value) => option.name == value.name}

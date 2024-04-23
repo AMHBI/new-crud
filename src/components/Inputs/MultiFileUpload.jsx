@@ -28,20 +28,7 @@ const VisuallyHiddenInput = styled("input")({
 
 const MultiFileUpload = ({ files, setFiles, serverFiles, setServerFiles }) => {
   const [showFiles, setShowFiles] = useState(false);
-  //   const submitFiles = async () => {
-  //     // const formattedFiles = await Promise.all(
-  //     //   files.map(async (file) => {
-  //     //     return {
-  //     //       fileName: file.name,
-  //     //       format: await toBase64(file),
-  //     //     };
-  //     //   })
-  //     // );
-  //     // console.log(formattedFiles);
-  //     // await setServerFiles(formattedFiles);
-  //     console.log(await serverFiles);
-  //   };
-
+  
   const deleteHandler = (name) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== name));
   };
@@ -57,7 +44,6 @@ const MultiFileUpload = ({ files, setFiles, serverFiles, setServerFiles }) => {
       ).then((data) => setServerFiles(data));
       
     }
-    console.log(serverFiles);
   }, [files]);
   const handleSelectedFile = (event) => {
     const files = Array.from(event.target.files);
