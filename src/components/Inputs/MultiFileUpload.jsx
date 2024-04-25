@@ -26,15 +26,21 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-const MultiFileUpload = ({ files, setFiles, serverFiles, setServerFiles }) => {
+const MultiFileUpload = ({
+  files,
+  setFiles,
+  serverFiles,
+  setServerFiles,
+  isEditing,
+}) => {
   const [showFiles, setShowFiles] = useState(false);
-  
+
   const deleteHandler = (name) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== name));
   };
   useEffect(() => {
-    if (files.length > 0) {
-      const data = Promise.all(
+    if (files.length > 0 && !isEditing) {
+      Promise.all(
         files?.map(async (file) => {
           return {
             fileName: file.name,
@@ -42,7 +48,6 @@ const MultiFileUpload = ({ files, setFiles, serverFiles, setServerFiles }) => {
           };
         })
       ).then((data) => setServerFiles(data));
-      
     }
   }, [files]);
   const handleSelectedFile = (event) => {
@@ -63,7 +68,7 @@ const MultiFileUpload = ({ files, setFiles, serverFiles, setServerFiles }) => {
   };
 
   return (
-    <div>
+    <div style={{ backgroundColor: "white", zIndex: -1000 }}>
       <Button
         component='label'
         role={undefined}
@@ -85,24 +90,34 @@ const MultiFileUpload = ({ files, setFiles, serverFiles, setServerFiles }) => {
             {showFiles ? "عدم نمایش فایل ها" : "نمایش فایل ها"}
           </Button>
           {showFiles ? (
-            <Box sx={{ flexGrow: 1, maxWidth: 752 }}>
+            <Box sx={{ maxWidth: 752, position: "absolute" }}>
               <List>
                 {files.map((f) => (
                   <ListItem
                     key={f.name}
                     secondaryAction={
-                      <IconButton
-                        edge='end'
-                        aria-label='delete'
-                        sx={{ color: "red" }}
-                        onClick={() => deleteHandler(f.name)}>
-                        <DeleteIcon />
-                      </IconButton>
+                      <>
+                        <IconButton
+                          edge='end'
+                          aria-label='delete'
+                          onClick={() => showHandler(f)}>
+                          <RemoveRedEyeIcon sx={{ cursor: "pointer" }} />
+                        </IconButton>
+                        <IconButton
+                          edge='end'
+                          aria-label='delete'
+                          sx={{ color: "red" }}
+                          onClick={() => deleteHandler(f.name)}>
+                          <DeleteIcon />
+                        </IconButton>
+                      </>
                     }>
-                    <ListItemAvatar onClick={() => showHandler(f)}>
-                      <RemoveRedEyeIcon sx={{ cursor: "pointer" }} />
-                    </ListItemAvatar>
-                    <ListItemText primary={f.name} />
+                    <ListItemText
+                      sx={{ backgroundColor: "white" }}
+                      primary={f.name}
+                    />
+                    <ListItemAvatar
+                      onClick={() => showHandler(f)}></ListItemAvatar>
                   </ListItem>
                 ))}
               </List>

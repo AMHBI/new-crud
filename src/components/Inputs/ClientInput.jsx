@@ -22,6 +22,7 @@ import MultiSelectAutoComplete from "./MultiSelectAutoComplete";
 import MultiFileUpload from "./MultiFileUpload";
 import { GET_CLIENTS } from "../../graphql/queries";
 import { Grid } from "@mui/material";
+import { decodedFile } from "../../utils/base64ToFile";
 
 function CustomTextField({ onFocus, value, onChange, errors }) {
   return (
@@ -106,6 +107,10 @@ const ClientInput = ({ setIsEditing, isEditing, editRowData }) => {
       setValue("clientName", editRowData.name);
       setSelectValue(JSON.parse(editRowData.sections));
       setValue("date", new Date(+editRowData.date));
+      const getEditFiles = JSON.parse(editRowData.files).map((item) => {
+        return decodedFile(item.format, isEditing, item.fileName);
+      });
+      setFiles(getEditFiles);
     }
   }, [isEditing]);
   const editHandler = async () => {
@@ -126,6 +131,7 @@ const ClientInput = ({ setIsEditing, isEditing, editRowData }) => {
     setIsEditing(false);
     reset();
     setSelectValue([]);
+    setFiles([]);
   };
   useEffect(() => {
     setValue("section", selectValue);
@@ -242,6 +248,7 @@ const ClientInput = ({ setIsEditing, isEditing, editRowData }) => {
                     setFiles={setFiles}
                     serverFiles={serverFiles}
                     setServerFiles={setServerFiles}
+                    isEditing={isEditing}
                   />
                 );
               }}

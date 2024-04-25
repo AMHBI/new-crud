@@ -12,9 +12,10 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { Button, IconButton, Modal, Tooltip } from "@mui/material";
+import { Button, IconButton, Tooltip } from "@mui/material";
 import { GET_CLIENTS } from "../../graphql/queries";
 import { decodedFile } from "../../utils/base64ToFile";
+import ShowModal from "../../modules/Modal";
 
 // const ShowModal =  ({onClick,onClose,open,url}) => {
 //   return  (
@@ -41,13 +42,16 @@ const ClientTable = ({
   const [clientData, setClientData] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [fileString, setFileString] = useState("");
-
-  const handleModalClose = () => {
-    setModalOpen(false);
-  };
+  const [openModal, setOpenModal] = useState(false);
+  const [modalFiles, setModalFiles] = useState(undefined);
 
   const showFilesInModal = (filesArray) => {
-    console.log(filesArray);
+    const newArray = filesArray.map((item) => {
+      return { fileName: item.fileName, data: decodedFile(item.format) };
+    });
+    setModalFiles(newArray);
+    setOpenModal(true);
+    console.log(newArray);
   };
   const [
     deleteClient,
@@ -121,6 +125,11 @@ const ClientTable = ({
                           onClick={() => showFilesInModal(JSON.parse(i.files))}>
                           نمایش فایل ها
                         </Button>
+                        <ShowModal
+                          openModal={openModal}
+                          setOpenModal={setOpenModal}
+                          modalFiles={modalFiles}
+                        />
                       </>
                     )}
                   </TableCell>
